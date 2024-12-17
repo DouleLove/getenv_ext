@@ -129,18 +129,32 @@ class CollectionEnvVariable(_EnvVariable):
             ) from None
 
     def _to_determined_type(self, value: str, collection: tuple[str]) -> Any:
+        # returning dict if it's possible to convert to dict.
+        # Otherwise, ignoring ValueError which is raised by self._try_to_dict()
         with suppress(ValueError):
             return self._try_to_dict(collection)
 
         as_str = value.strip()
 
         try:
+            # taking first and last chars of stripped string.
+            # If they are matching to some of the python types like
+            # [], (), {}, then determining the value type from the brackets
             determined_type = type(ast.literal_eval(as_str[0] + as_str[-1]))
+
+            # check that brackets are not "" or something like this,
+            # which will also be validly converted to str by ast.literal_eval()
             if determined_type not in (list, tuple, set, dict):
                 determined_type = self._DEFAULT_CONVERT_COLLECTION_TYPE
         except (ValueError, SyntaxError, IndexError):
+            # ast.literal_eval() raised an error,
+            # which means that we could not determine the type of given string,
+            # and just convert collection to default convert type
             determined_type = self._DEFAULT_CONVERT_COLLECTION_TYPE
 
+        # {} is recognized as dict by default, but we have already checked
+        # that collection is not a dict (with self._try_to_dict()), so
+        # out collection is a set
         if determined_type == dict:
             determined_type = set
 
@@ -148,6 +162,7 @@ class CollectionEnvVariable(_EnvVariable):
 
     @staticmethod
     def _try_to_dict(collection: tuple[str]) -> tuple | dict:
+        # length of collection must be even to convert it to key-value pairs
         if len(collection) % 2 != 0:
             raise ValueError(f'Could not convert "{collection}" to dict')
 
@@ -156,6 +171,7 @@ class CollectionEnvVariable(_EnvVariable):
             k, v = collection[idx], collection[idx + 1]
             if not k.endswith(":") or v.endswith(":"):
                 raise ValueError(f'Could not convert "{collection}" to dict')
+            # put key to dict with wrapping quotes removed
             as_dict[k[:-1].strip('"').strip("'")] = v
 
         return as_dict
@@ -181,6 +197,7 @@ class CollectionEnvVariable(_EnvVariable):
         if value.endswith(","):
             value = value[:-1]
 
+        # escaping quotes with backslashes
         if (
             value.startswith('\\"')
             and value.endswith('\\"')
@@ -201,5 +218,6 @@ class CollectionEnvVariable(_EnvVariable):
         for idx, v in enumerate(values):
             values[idx] = self._wrap_with_quotes(v)
 
+        # wrap with parenthesis to make it look tuple-like
         value = f'({", ".join(values)},)'
         return value
