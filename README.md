@@ -29,12 +29,13 @@ $ git clone https://github.com/DouleLove/getenv_ext
 
 ## Usage example
 ```py
-import gnvext
 import django
+import gnvext
 
 # let's assume we have DJANGO_ALLOWED_HOSTS environment variable
 # which we want to extract and convert to list.
 # If it does not exist, ['*'] will be returned
+# (you should load dotenv first, if your variable is in .env file)
 
 ALLOWED_HOSTS = gnvext.CollectionEnvVariable(
     'DJANGO_ALLOWED_HOSTS',
