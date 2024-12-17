@@ -22,6 +22,11 @@ classifiers = [
     'Programming Language :: Python :: 3.12',
 ]
 
+[project.urls]
+Homepage = "https://github.com/DouleLove/getenv_ext"
+Issues = "https://github.com/DouleLove/getenv_ext/issues"
+Repository = "https://github.com/DouleLove/getenv_ext"
+
 [project.optional-dependencies]
 lint = [
     'black==24.10.0',
