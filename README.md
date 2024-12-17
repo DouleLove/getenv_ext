@@ -22,7 +22,7 @@ $ py -3 -m pip install gnvext
 
 Also, gnvext may be cloned from GitHub:
 ```bash
-$ git clone https://github.com/DouleLove/gnvext
+$ git clone https://github.com/DouleLove/getenv_ext
 ```
 
 <br>
