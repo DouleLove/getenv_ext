@@ -35,7 +35,6 @@ from contextlib import suppress
 from typing import Any, Type
 
 from gnvext.converters.base import EnvVariable as _EnvVariable
-from gnvext.tests.utils import MISSING
 
 
 class StringEnvVariable(_EnvVariable):
@@ -101,7 +100,7 @@ class CollectionEnvVariable(_EnvVariable):
         the type to which the collection should be cast (list by default)
     """
 
-    convert_collection_type: Type = MISSING
+    convert_collection_type: Type = None
     _DEFAULT_CONVERT_COLLECTION_TYPE = list
     _BRACKETS = "{}()[]"
 
