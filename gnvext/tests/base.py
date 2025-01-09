@@ -160,17 +160,20 @@ class EnvVariablesTestSuite(unittest.TestSuite):
     TESTCASES:
         collection which contains tests data to be passed
         into each test case sequentially.
-        Test data must look like [Value, Expected, Default]
+        Each test data must be an instance of TestData class
+        or look like [Value, Expected, Default, Context]
         where Value is a value of env variable with TEST_ENV_VAR_NAME name,
         Expected is a value which should be gotten after convert,
-        Default is a value to be returned is Value param is :class:`MISSING`
+        Default is a value to be returned is Value param is :class:`MISSING`,
+        Context is a dictionary containing pairs:
+        class to test attr name - value of this attr
     """
 
     TEST_ENV_VAR_NAME: str = "__TEST_ENV_VAR__"
     CLS_TO_TEST: Type[EnvVariable] = ...
     TESTCASES: Iterable[TestData] = ...
 
-    def _make_tests(self) -> None:
+    def _add_tests(self) -> None:
         for testdata in map(lambda td: TestData(*td), self.TESTCASES):
             testcase = _TestCaseFactory(
                 suite=self,
@@ -182,11 +185,13 @@ class EnvVariablesTestSuite(unittest.TestSuite):
             self.addTest(testcase)
 
     def run(
-        self, result: unittest.TestResult, debug: bool = False
+        self,
+        result: unittest.TestResult,
+        debug: bool = False,
     ) -> unittest.TestResult:
         """
         creates tests from given TESTCASES and runs them separately
         """
 
-        self._make_tests()
+        self._add_tests()
         return super().run(result, debug)

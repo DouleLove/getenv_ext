@@ -44,7 +44,8 @@ include-package-data = true
 
 
 [tool.flake8]
-max_line_length = 79
+inline-quotes = "double"
+max-line-length = 79
 extend-exclude = [
     ".venv",
     "venv",
