@@ -42,22 +42,36 @@ class EnvVariable(abc.ABC):
             env variable name to be extracted
         default:
             value to be returned if env variable with given name does not exist
+            .. note::
+              if env variable with the specified name does not exist
+              and given default value is a subclass of BaseException
+              (or its instance), then the provided exception will be raised
         """
 
         self._name = name
         self._default = default
 
-        self._extracted = os.getenv(self._name, self._default)
+        try:
+            self._extracted = os.environ[self._name]
+            self._var_is_missing = False
+        except KeyError:
+            self._extracted = self._default
+            self._var_is_missing = True
 
     @property
-    def value(self) -> str | None:
+    def value(self) -> Any:
         """
         property to get a converted value of env variable with the given name
         """
 
-        # ignore convertion if env variable's value is missing
-        if self._extracted == self._default:
-            return self._extracted
+        # try raise exception
+        # (default is a BaseException subclass or instance)
+        # if it fails, then return default value
+        if self._var_is_missing:
+            try:
+                raise self._extracted
+            except TypeError:
+                return self._extracted
 
         return self.convert(self._extracted)
 
