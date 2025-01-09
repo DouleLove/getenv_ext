@@ -43,6 +43,7 @@ class TestStringEnvVariable(EnvVariablesTestSuite):
         TestData(MISSING, "abcd", "abcd"),
         TestData(MISSING, None),
         TestData(MISSING, 10, 10),
+        TestData(MISSING, KeyError, KeyError),
     ]
 
 
@@ -56,6 +57,7 @@ class TestIntegerEnvVariable(EnvVariablesTestSuite):
         TestData(MISSING, 1234, 1234),
         TestData(MISSING, None),
         TestData(MISSING, 17.4, 17.4),
+        TestData(MISSING, KeyError, KeyError),
     ]
 
 
@@ -70,6 +72,7 @@ class TestFloatEnvVariable(EnvVariablesTestSuite):
         TestData(MISSING, 1234.4, 1234.4),
         TestData(MISSING, None),
         TestData(MISSING, 17, 17),
+        TestData(MISSING, KeyError, KeyError),
     ]
 
 
@@ -105,6 +108,7 @@ class TestBooleanEnvVariable(EnvVariablesTestSuite):
         TestData(MISSING, False, False),
         TestData(MISSING, None),
         TestData(MISSING, "True", "True"),
+        TestData(MISSING, KeyError, KeyError),
     ]
 
 
@@ -139,6 +143,7 @@ class TestCollectionEnvVariable(EnvVariablesTestSuite):
         TestData('("a", "b")', ("a", "b")),
         TestData("(val,)", ("val",)),
         TestData('["a", "b"]', ("a", "b"), context=_TUPLE_CTX),
+        TestData(MISSING, KeyError, KeyError),
     ]
 
 
