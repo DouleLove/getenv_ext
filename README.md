@@ -20,26 +20,35 @@ $ python3 -m pip install gnvext
 $ py -3 -m pip install gnvext
 ```
 
-Also, gnvext may be cloned from GitHub:
-```bash
-$ git clone https://github.com/DouleLove/gnvext
-```
-
 <br>
 
-## Usage example
+## Quick example
 ```py
 import gnvext
-import django
 
-# let's assume we have DJANGO_ALLOWED_HOSTS environment variable
-# which we want to extract and convert to list.
-# If it does not exist, ['*'] will be returned
+# you can load .env file here
 
-ALLOWED_HOSTS = gnvext.CollectionEnvVariable(
-    'DJANGO_ALLOWED_HOSTS',
-    ['*'],
+# if "PRINT_HELLO_WORLD" env variable exists,
+# then extracts it, otherwise, raises ValueError.
+# (raises only if default is a subclass of BaseException (or its instance),
+#  in another case, returns default as-is)
+PRINT_HELLO_WORLD = gnvext.BooleanEnvVariable(
+    name="PRINT_HELLO_WORLD",
+    default=ValueError("we don't know if we should greet world or not :("),
 ).value
 
-...  # django project settings.py stuff here
+if PRINT_HELLO_WORLD:
+    print("Hello, world!")
+
+# output for PRINT_HELLO_WORLD=True
+# Hello, world!
+
+# output for PRINT_HELLO_WORLD=False
+#
+
+# output for PRINT_HELLO_WORLD=None
+# ValueError: could not convert "None" to bool
+
+# output for undeclared env var PRINT_HELLO_WORLD
+# ValueError: we don't know if we should greet world or not :(
 ```
