@@ -64,16 +64,18 @@ class EnvVariable(abc.ABC):
         property to get a converted value of env variable with the given name
         """
 
-        # try raise exception
-        # (default is a BaseException subclass or instance)
-        # if it fails, then return default value
-        if self._var_is_missing:
-            try:
-                raise self._extracted
-            except TypeError:
-                return self._extracted
+        if not self._var_is_missing:
+            return self.convert(self._extracted)
 
-        return self.convert(self._extracted)
+        # if default is a BaseException subclass or instance - raise it.
+        # Otherwise, return default
+        if (
+            isinstance(self._extracted, type)
+            and issubclass(self._extracted, BaseException)
+            or issubclass(self._extracted.__class__, BaseException)
+        ):
+            raise self._extracted
+        return self._extracted
 
     @abc.abstractmethod
     def convert(self, value: str) -> Any:
