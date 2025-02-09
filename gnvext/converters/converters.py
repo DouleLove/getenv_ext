@@ -100,7 +100,7 @@ class CollectionEnvVariable(_EnvVariable):
         the type to which the collection should be cast (list by default)
     """
 
-    convert_collection_type: Type = None
+    convert_collection_type: Type = ...
     _DEFAULT_CONVERT_COLLECTION_TYPE = list
     _BRACKETS = "{}()[]"
 
@@ -110,19 +110,19 @@ class CollectionEnvVariable(_EnvVariable):
         # building collection from a cleaned string
         collection = ast.literal_eval(tuple_like_string)
 
-        # convert collection to the expected type and return it
-        try:
+        if self.convert_collection_type != Ellipsis:
             return self._to_expected_type(value, collection)
-        except ValueError:
-            return self._to_determined_type(value, collection)
+
+        return self._to_determined_type(value, collection)
 
     def _to_expected_type(self, value: str, collection: tuple[str]) -> Any:
-        if self.convert_collection_type == dict:
-            return self._try_to_dict(collection)
-
         try:
-            return self.convert_collection_type(collection)
-        except TypeError:
+            return (
+                self._try_to_dict
+                if self.convert_collection_type == dict
+                else self.convert_collection_type
+            )(collection)
+        except (ValueError, TypeError):
             raise ValueError(
                 f'Could not convert "{value}" to expected type',
             ) from None
@@ -153,7 +153,7 @@ class CollectionEnvVariable(_EnvVariable):
 
         # {} is recognized as dict by default, but we have already checked
         # that collection is not a dict (with self._try_to_dict()), so
-        # out collection is a set
+        # our collection is a set
         if determined_type == dict:
             determined_type = set
 
