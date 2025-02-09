@@ -24,9 +24,12 @@ DEALINGS IN THE SOFTWARE.
 
 __all__ = ()
 
+import datetime
+
 from gnvext.converters.converters import (
     BooleanEnvVariable,
     CollectionEnvVariable,
+    DateTimeEnvVariable,
     FloatEnvVariable,
     IntegerEnvVariable,
     StringEnvVariable,
@@ -140,7 +143,7 @@ class TestCollectionEnvVariable(EnvVariablesTestSuite):
         TestData(MISSING, None),
         TestData(MISSING, (1, 2, 3), (1, 2, 3)),
         TestData('{"a": 1, "b": 2}', {"a": "1", "b": "2"}),
-        TestData('"a":1, "b": 2', ['"a":1', '"b":', "2"], context=_DICT_CTX),
+        TestData('"a":1, "b": 2', ValueError, context=_DICT_CTX),
         TestData('{"a": 2, "b": 4}', {"a": "2", "b": "4"}, context=_DICT_CTX),
         TestData(""" {"a", 'b'}""", {"a", "b"}),
         TestData('  {"ab", "bc"} ', {"ab", "bc"}, context=_SET_CTX),
@@ -152,6 +155,55 @@ class TestCollectionEnvVariable(EnvVariablesTestSuite):
     ]
 
 
+class TestDatetimeEnvVariable(EnvVariablesTestSuite):
+    _FORMAT_DATE = "%Y-%m-%d"
+    _FORMAT_DATE_2N_YEAR = "%y-%m-%d"
+    _FORMAT_TIME_FULL = "%H:%M:%S.%f"
+    _FORMAT_TIME_NO_MS = "%H:%M:%S"
+    _FORMAT_DT_FULL = f"{_FORMAT_DATE} {_FORMAT_TIME_FULL}"
+    _FORMAT_DT_NO_MS = f"{_FORMAT_DATE} {_FORMAT_TIME_NO_MS}"
+    _FORMAT_DT_FULL_2N_YEAR = f"{_FORMAT_DATE_2N_YEAR} {_FORMAT_TIME_FULL}"
+    _FORMAT_DT_NO_MS_2N_YEAR = f"{_FORMAT_DATE_2N_YEAR} {_FORMAT_TIME_NO_MS}"
+    _FORMAT_YEAR_ONLY = "%Y"
+
+    _DT_NOW = datetime.datetime.now()
+    _TIME_NOW = _DT_NOW.time()
+    _TIME_NOW_NO_MS = (
+        _DT_NOW - datetime.timedelta(microseconds=_DT_NOW.microsecond)
+    ).time()
+    _DATE_NOW = _DT_NOW.date()
+    _DT_NOW_NO_MS = datetime.datetime.combine(_DATE_NOW, _TIME_NOW_NO_MS)
+
+    _DT_FORMAT_ATTR_NAME = "datetime_format"
+
+    _DT_FULL_2N_YEAR_CTX = {_DT_FORMAT_ATTR_NAME: _FORMAT_DT_FULL_2N_YEAR}
+    _DT_NO_MS_2N_YEAR_CTX = {_DT_FORMAT_ATTR_NAME: _FORMAT_DT_NO_MS_2N_YEAR}
+
+    CLS_TO_TEST = DateTimeEnvVariable
+    TESTCASES = [
+        TestData(_DT_NOW.strftime(_FORMAT_DT_FULL), _DT_NOW),
+        TestData(_DT_NOW.strftime(_FORMAT_DT_NO_MS), _DT_NOW_NO_MS),
+        TestData(_DT_NOW.strftime(_FORMAT_TIME_FULL), _TIME_NOW),
+        TestData(_TIME_NOW.strftime(_FORMAT_TIME_NO_MS), _TIME_NOW_NO_MS),
+        TestData(_DT_NOW.strftime(_FORMAT_DATE), _DATE_NOW),
+        TestData(_DATE_NOW.strftime(_FORMAT_DATE), _DATE_NOW),
+        TestData(
+            _DT_NOW.strftime(_FORMAT_DT_FULL_2N_YEAR),
+            _DT_NOW,
+            context=_DT_FULL_2N_YEAR_CTX,
+        ),
+        TestData(
+            _DATE_NOW.strftime(_FORMAT_DT_NO_MS_2N_YEAR),
+            _DATE_NOW,
+            context=_DT_NO_MS_2N_YEAR_CTX,
+        ),
+        TestData(_DT_NOW.strftime(_FORMAT_YEAR_ONLY), ValueError),
+        TestData(MISSING, None),
+        TestData(MISSING, KeyError, KeyError),
+        TestData(MISSING, ValueError, ValueError()),
+    ]
+
+
 if __name__ == "__main__":
     with generic_suite_runner() as suite:
         suite.addTest(TestStringEnvVariable())
@@ -159,3 +211,4 @@ if __name__ == "__main__":
         suite.addTest(TestFloatEnvVariable())
         suite.addTest(TestBooleanEnvVariable())
         suite.addTest(TestCollectionEnvVariable())
+        suite.addTest(TestDatetimeEnvVariable())
