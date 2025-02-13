@@ -234,32 +234,6 @@ class DateTimeEnvVariable(_EnvVariable):
         "%H:%M:%S.%f",
     ]
 
-    @staticmethod
-    def _get_default_dt_date() -> datetime.date:
-        return datetime.datetime.strptime(
-            "1:2:3.456789",
-            "%H:%M:%S.%f",
-        ).date()
-
-    @staticmethod
-    def _get_default_dt_time() -> datetime.time:
-        return datetime.datetime.strptime(
-            "2000-3-1",
-            "%Y-%m-%d",
-        ).time()
-
-    def _associate_datetime_with_type(
-        self,
-        dt: datetime.datetime,
-    ) -> datetime.datetime | datetime.time | datetime.date:
-        if dt.date() == self._get_default_dt_date():
-            return dt.time()
-
-        if dt.time() == self._get_default_dt_time():
-            return dt.date()
-
-        return dt
-
     def _get_formats_iterator(self) -> Iterator[str]:
         if self.datetime_format != Ellipsis:
             return iter((self.datetime_format,))
@@ -276,17 +250,11 @@ class DateTimeEnvVariable(_EnvVariable):
             ),
         )
 
-    def convert(
-        self,
-        value: str,
-    ) -> datetime.datetime | datetime.time | datetime.date:
+    def convert(self, value: str) -> datetime.datetime:
         for fmt in self._get_formats_iterator():
             with suppress(ValueError):
-                return self._associate_datetime_with_type(
-                    datetime.datetime.strptime(value, fmt),
-                )
+                return datetime.datetime.strptime(value, fmt)
 
         raise ValueError(
             f'Could not convert "{value}" to datetime',
         )
-

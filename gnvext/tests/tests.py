@@ -173,6 +173,14 @@ class TestDatetimeEnvVariable(EnvVariablesTestSuite):
     ).time()
     _DATE_NOW = _DT_NOW.date()
     _DT_NOW_NO_MS = datetime.datetime.combine(_DATE_NOW, _TIME_NOW_NO_MS)
+    _DATE_UNIX_START = datetime.datetime.strptime(
+        _DT_NOW.time().strftime(_FORMAT_TIME_FULL),
+        _FORMAT_TIME_FULL,
+    ).date()
+    _TIME_UNIX_START = datetime.datetime.strptime(
+        _DATE_NOW.strftime(_FORMAT_DATE),
+        _FORMAT_DATE,
+    ).time()
 
     _DT_FORMAT_ATTR_NAME = "datetime_format"
 
@@ -183,10 +191,22 @@ class TestDatetimeEnvVariable(EnvVariablesTestSuite):
     TESTCASES = [
         TestData(_DT_NOW.strftime(_FORMAT_DT_FULL), _DT_NOW),
         TestData(_DT_NOW.strftime(_FORMAT_DT_NO_MS), _DT_NOW_NO_MS),
-        TestData(_DT_NOW.strftime(_FORMAT_TIME_FULL), _TIME_NOW),
-        TestData(_TIME_NOW.strftime(_FORMAT_TIME_NO_MS), _TIME_NOW_NO_MS),
-        TestData(_DT_NOW.strftime(_FORMAT_DATE), _DATE_NOW),
-        TestData(_DATE_NOW.strftime(_FORMAT_DATE), _DATE_NOW),
+        TestData(
+            _DT_NOW.strftime(_FORMAT_TIME_FULL),
+            datetime.datetime.combine(_DATE_UNIX_START, _TIME_NOW),
+        ),
+        TestData(
+            _TIME_NOW.strftime(_FORMAT_TIME_NO_MS),
+            datetime.datetime.combine(_DATE_UNIX_START, _TIME_NOW_NO_MS),
+        ),
+        TestData(
+            _DT_NOW.strftime(_FORMAT_DATE),
+            datetime.datetime.combine(_DATE_NOW, _TIME_UNIX_START),
+        ),
+        TestData(
+            _DATE_NOW.strftime(_FORMAT_DATE),
+            datetime.datetime.combine(_DATE_NOW, _TIME_UNIX_START),
+        ),
         TestData(
             _DT_NOW.strftime(_FORMAT_DT_FULL_2N_YEAR),
             _DT_NOW,
@@ -194,7 +214,7 @@ class TestDatetimeEnvVariable(EnvVariablesTestSuite):
         ),
         TestData(
             _DATE_NOW.strftime(_FORMAT_DT_NO_MS_2N_YEAR),
-            _DATE_NOW,
+            datetime.datetime.combine(_DATE_NOW, _TIME_UNIX_START),
             context=_DT_NO_MS_2N_YEAR_CTX,
         ),
         TestData(_DT_NOW.strftime(_FORMAT_YEAR_ONLY), ValueError),
